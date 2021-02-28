@@ -1,5 +1,6 @@
 import axios from "axios";
 import unflatten from "./unflatten";
+import "../css/style.css";
 
 // ************** Generate the tree diagram	 *****************
 const margin = { top: 20, right: 120, bottom: 20, left: 120 };
