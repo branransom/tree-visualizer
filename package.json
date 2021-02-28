@@ -1,0 +1,33 @@
+{
+  "name": "tree-visualizer",
+  "version": "1.0.0",
+  "description": "This project generates a UI to view an interactive tree. I am building this as a tool to help debug the decision tree within my `chess-ai` project.",
+  "main": "webpack.config.js",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "dev": "webpack serve --open"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/branransom/tree-visualizer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/branransom/tree-visualizer/issues"
+  },
+  "homepage": "https://github.com/branransom/tree-visualizer#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "webpack": "^5.24.2"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.13.8",
+    "@babel/preset-env": "^7.13.8",
+    "babel-loader": "^8.2.2",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
