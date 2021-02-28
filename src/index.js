@@ -28,11 +28,9 @@ const svg = d3
 const draw = async () => {
   const { data } = await axios.get("http://localhost:5000/decision_tree");
 
-  root = unflatten(data)[0];
+  root = unflatten(data.sort((a, b) => b.value - a.value))[0];
   root.x0 = height / 2;
   root.y0 = 0;
-
-  console.log(root);
 
   update(root);
 
@@ -197,6 +195,7 @@ function click(d) {
     d.children = d._children;
     d._children = null;
   }
+
   update(d);
 }
 
