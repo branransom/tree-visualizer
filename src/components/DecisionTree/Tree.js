@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import * as d3 from "d3";
-import useResizeObserver from "../hooks/useResizeObserver";
+import useResizeObserver from "../../hooks/useResizeObserver";
 
 function usePrevious(value) {
   const ref = useRef();
@@ -56,6 +56,9 @@ const Tree = ({ data }) => {
       .attr("cx", (node) => node.y)
       .attr("cy", (node) => node.x)
       .attr("r", 4)
+      .on("click", (event, d) => {
+        console.log(d);
+      })
       .transition()
       .duration(500)
       .delay((node) => node.depth * 300)
@@ -115,8 +118,16 @@ const Tree = ({ data }) => {
   }, [data, dimensions, previouslyRenderedData]);
 
   return (
-    <div ref={wrapperRef} style={{ marginBottom: "2rem" }}>
-      <svg ref={svgRef}></svg>
+    <div className="tree" ref={wrapperRef} style={{ marginBottom: "2rem" }}>
+      <svg
+        ref={svgRef}
+        style={{
+          display: "block",
+          overflow: "visible",
+          height: "80vh",
+          width: "100%",
+        }}
+      ></svg>
     </div>
   );
 };
