@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
@@ -47,6 +48,9 @@ module.exports = {
       filename: "[name].css",
       chunkFilename: "[id].css",
       ignoreOrder: false,
+    }),
+    new webpack.EnvironmentPlugin({
+      CHESS_AI_URI: "http://localhost:5000",
     }),
   ],
   output: {

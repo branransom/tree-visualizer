@@ -7,25 +7,30 @@ import DecisionTree from "./DecisionTree";
 import TranspositionTable from "./TranspositionTable";
 import "./style.scss";
 
+const { CHESS_AI_URI } = process.env;
+
 const nextMove = async ({ fen }) => {
-  const { data } = await axios.post("http://localhost:5000/next_move", {
+  const { data } = await axios.post(`${CHESS_AI_URI}/next_move`, {
     fen,
   });
 
   return data.fen;
 };
 
-const handleReset = async () => {
-  await axios.post("http://localhost:5000/reset");
-};
+const STARTING_FEN =
+  "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 0 1";
 
 const App = () => {
-  const [position, setPosition] = useState(
-    "r5rk/5p1p/5R2/4B3/8/8/7P/7K w - - 0 1"
-  );
+  const [position, setPosition] = useState(STARTING_FEN);
   const [decisionTree, setDecisionTree] = useState([{ id: "root" }]);
 
   const game = new Chess(position);
+
+  const handleReset = async () => {
+    await axios.post(`${CHESS_AI_URI}/reset`);
+
+    setPosition(STARTING_FEN);
+  };
 
   const handleMove = async ({ sourceSquare, targetSquare }) => {
     const move = game.move({
@@ -38,15 +43,13 @@ const App = () => {
     if (move === null) return;
 
     const fen = game.fen();
-
     setPosition(fen);
 
     const nextFEN = await nextMove({ fen });
-
     setPosition(nextFEN);
 
-    const result = await axios.get("http://localhost:5000/decision_tree");
-    setDecisionTree([{ id: "root" }, ...result.data]);
+    const { data } = await axios.get(`${CHESS_AI_URI}/decision_tree`);
+    setDecisionTree([{ id: "root" }, ...data]);
   };
 
   return (
