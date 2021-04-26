@@ -21,6 +21,7 @@
   "homepage": "https://github.com/branransom/tree-visualizer#readme",
   "dependencies": {
     "axios": "^0.21.1",
+    "chess.js": "^0.11.0",
     "chessboardjsx": "^2.4.2",
     "d3": "^6.5.0",
     "react": "^17.0.1",

@@ -1,23 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import * as Chess from "chess.js";
 import ChessBoard from "./ChessBoard";
 import DecisionTree from "./DecisionTree";
 import TranspositionTable from "./TranspositionTable";
 import "./style.scss";
 
-const move = async ({ fen, sourceSquare, targetSquare }) => {
-  const { data } = await axios.post("http://localhost:5000/move", {
-    fen,
-    sourceSquare,
-    targetSquare,
-  });
-
-  return data.fen;
-};
-
 const nextMove = async ({ fen }) => {
-  console.log(fen);
   const { data } = await axios.post("http://localhost:5000/next_move", {
     fen,
   });
@@ -25,18 +15,33 @@ const nextMove = async ({ fen }) => {
   return data.fen;
 };
 
+const handleReset = async () => {
+  await axios.post("http://localhost:5000/reset");
+};
+
 const App = () => {
-  const [position, setPosition] = useState("r5rk/5p1p/5R2/4B3/8/8/7P/7K w");
+  const [position, setPosition] = useState(
+    "r5rk/5p1p/5R2/4B3/8/8/7P/7K w - - 0 1"
+  );
   const [decisionTree, setDecisionTree] = useState([{ id: "root" }]);
 
-  const handleMove = async ({ sourceSquare, targetSquare }) => {
-    const fen = await move({ fen: position, sourceSquare, targetSquare });
+  const game = new Chess(position);
 
-    console.log("fen: ", fen);
+  const handleMove = async ({ sourceSquare, targetSquare }) => {
+    const move = game.move({
+      from: sourceSquare,
+      to: targetSquare,
+      promotion: "q", // always promote to a queen for simplicity
+    });
+
+    // Illegal move
+    if (move === null) return;
+
+    const fen = game.fen();
+
+    setPosition(fen);
 
     const nextFEN = await nextMove({ fen });
-
-    console.log("next fen: ", nextFEN);
 
     setPosition(nextFEN);
 
@@ -66,17 +71,21 @@ const App = () => {
         </nav>
         <div id="container">
           <Switch>
+            <Route exact path="/">
+              <div>Teaching a computer how to play chess</div>
+            </Route>
             <Route path="/chess-board">
-              <ChessBoard position={position} handleMove={handleMove} />
+              <ChessBoard
+                position={position}
+                handleMove={handleMove}
+                handleReset={handleReset}
+              />
             </Route>
             <Route path="/decision-tree">
               <DecisionTree decisionTree={decisionTree} />
             </Route>
             <Route path="/transposition-table">
               <TranspositionTable />
-            </Route>
-            <Route exact path="/">
-              <div>Teaching a computer how to play chess</div>
             </Route>
           </Switch>
         </div>
