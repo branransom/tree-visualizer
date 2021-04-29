@@ -3,8 +3,6 @@ import Chessboard from "chessboardjsx";
 import "./style.module.scss";
 
 const ChessBoard = ({ position, handleMove, handleReset }) => {
-  console.log(position);
-
   const handlePieceDrop = ({ sourceSquare, targetSquare }) => {
     handleMove({ sourceSquare, targetSquare });
   };

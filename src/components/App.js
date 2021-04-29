@@ -23,6 +23,7 @@ const STARTING_FEN =
 const App = () => {
   const [position, setPosition] = useState(STARTING_FEN);
   const [decisionTree, setDecisionTree] = useState([{ id: "root" }]);
+  const [principalVariation, setPrincipalVariation] = useState([]);
 
   const game = new Chess(position);
 
@@ -30,6 +31,16 @@ const App = () => {
     await axios.post(`${CHESS_AI_URI}/reset`);
 
     setPosition(STARTING_FEN);
+  };
+
+  const updateDecisionTree = async () => {
+    const { data } = await axios.get(`${CHESS_AI_URI}/decision_tree`);
+    setDecisionTree([{ id: "root" }, ...data]);
+  };
+
+  const updatePrincipalVariation = async () => {
+    const { data } = await axios.get(`${CHESS_AI_URI}/principal_variation`);
+    setPrincipalVariation(data);
   };
 
   const handleMove = async ({ sourceSquare, targetSquare }) => {
@@ -48,8 +59,8 @@ const App = () => {
     const nextFEN = await nextMove({ fen });
     setPosition(nextFEN);
 
-    const { data } = await axios.get(`${CHESS_AI_URI}/decision_tree`);
-    setDecisionTree([{ id: "root" }, ...data]);
+    updateDecisionTree();
+    updatePrincipalVariation();
   };
 
   return (
@@ -85,7 +96,10 @@ const App = () => {
               />
             </Route>
             <Route path="/decision-tree">
-              <DecisionTree decisionTree={decisionTree} />
+              <DecisionTree
+                decisionTree={decisionTree}
+                principalVariation={principalVariation}
+              />
             </Route>
             <Route path="/transposition-table">
               <TranspositionTable />

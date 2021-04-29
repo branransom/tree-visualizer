@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import useResizeObserver from "../../hooks/useResizeObserver";
 
@@ -10,8 +10,10 @@ function usePrevious(value) {
   return ref.current;
 }
 
-const Tree = ({ data }) => {
+const Tree = ({ data, importantNodes, toggleChildren }) => {
   if (!data || data.length === 0) return null;
+
+  console.log("re-rendering");
 
   // useRef returns a mutable object, which persists across render events.
   // Think of it as an instance variable
@@ -34,6 +36,8 @@ const Tree = ({ data }) => {
       .parentId((d) => d.parent)(data)
       .sort((a, b) => b.data.value - a.data.value);
 
+    console.log(root);
+
     const treeLayout = d3.tree().size([height, width]);
 
     const linkGenerator = d3
@@ -47,25 +51,42 @@ const Tree = ({ data }) => {
     console.warn("descendants", root.descendants());
     console.warn("links", root.links());
 
+    // prevent multiple tooltips from being created due to re-renders
     const tooltip = d3
       .select("#container")
       .append("div")
       .attr("class", "tooltip")
       .style("opacity", 0);
 
+    const descendants = root.descendants().map((d) => {
+      if (!d.data.hideChildren) {
+        return d;
+      }
+      console.log("hidden children", d);
+      console.log({
+        ...d,
+        children: null,
+      });
+
+      return {
+        ...d,
+        children: null,
+      };
+    });
+
     // nodes
     svg
       .selectAll(".node")
-      .data(root.descendants())
+      .data(descendants)
       .join((enter) => enter.append("circle").attr("opacity", 0))
       .attr("class", "node")
       .attr("cx", (node) => node.y)
       .attr("cy", (node) => node.x)
       .attr("r", 4)
       .on("mouseover", (event, d) => {
-        tooltip.text(`
-          alpha: ${d.data.alpha}\n
-          beta: ${d.data.beta}\n
+        tooltip.html(`
+          alpha: ${d.data.alpha}<br/>
+          beta: ${d.data.beta}<br/>
           value: ${d.data.value}
         `);
         tooltip
@@ -80,6 +101,7 @@ const Tree = ({ data }) => {
       })
       .on("click", (event, d) => {
         console.log(d);
+        toggleChildren(d.id);
       })
       .transition()
       .duration(500)
@@ -127,7 +149,7 @@ const Tree = ({ data }) => {
     // labels
     svg
       .selectAll(".label")
-      .data(root.descendants())
+      .data(descendants)
       .join((enter) => enter.append("text").attr("opacity", 0))
       .attr("class", "label")
       .attr("x", (node) => node.y)

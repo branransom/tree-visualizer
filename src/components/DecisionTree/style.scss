@@ -20,11 +20,13 @@ text.label {
 }
 
 div.tooltip {
+  display: flex;
   position: absolute;
-  text-align: center;
+  text-align: left;
+  align-items: center;
   width: 100px;
   height: 80px;
-  padding: 2px;
+  padding: 5px;
   font: 12px sans-serif;
   background: lightsteelblue;
   border: 0px;
