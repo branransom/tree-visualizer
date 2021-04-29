@@ -47,6 +47,12 @@ const Tree = ({ data }) => {
     console.warn("descendants", root.descendants());
     console.warn("links", root.links());
 
+    const tooltip = d3
+      .select("#container")
+      .append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+
     // nodes
     svg
       .selectAll(".node")
@@ -56,6 +62,22 @@ const Tree = ({ data }) => {
       .attr("cx", (node) => node.y)
       .attr("cy", (node) => node.x)
       .attr("r", 4)
+      .on("mouseover", (event, d) => {
+        tooltip.text(`
+          alpha: ${d.data.alpha}\n
+          beta: ${d.data.beta}\n
+          value: ${d.data.value}
+        `);
+        tooltip
+          .transition()
+          .duration(50)
+          .style("opacity", 1)
+          .style("left", event.pageX + "px")
+          .style("top", event.pageY - 28 + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.transition().duration(500).style("opacity", 0);
+      })
       .on("click", (event, d) => {
         console.log(d);
       })
