@@ -5,6 +5,7 @@ import * as Chess from "chess.js";
 import ChessBoard from "./ChessBoard";
 import DecisionTree from "./DecisionTree";
 import TranspositionTable from "./TranspositionTable";
+import Rect from "./Rect";
 import "./style.scss";
 
 const { CHESS_AI_URI } = process.env;
@@ -35,6 +36,7 @@ const App = () => {
 
   const updateDecisionTree = async () => {
     const { data } = await axios.get(`${CHESS_AI_URI}/decision_tree`);
+    console.log("updateDecisionTree", data);
     setDecisionTree([{ id: "root" }, ...data]);
   };
 
@@ -44,6 +46,7 @@ const App = () => {
   };
 
   const handleMove = async ({ sourceSquare, targetSquare }) => {
+    console.log(">>> handleMove");
     const move = game.move({
       from: sourceSquare,
       to: targetSquare,
@@ -103,6 +106,9 @@ const App = () => {
             </Route>
             <Route path="/transposition-table">
               <TranspositionTable />
+            </Route>
+            <Route path="/test">
+              <Rect />
             </Route>
           </Switch>
         </div>
