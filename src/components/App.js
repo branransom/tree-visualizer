@@ -5,9 +5,6 @@ import * as Chess from "chess.js";
 import ChessBoard from "./ChessBoard";
 import DecisionTree from "./DecisionTree";
 import TranspositionTable from "./TranspositionTable";
-import Rect from "./Rect";
-import BarChart from "./BarChart";
-import Boxes from "./Boxes";
 import "./style.scss";
 
 const { CHESS_AI_URI } = process.env;
