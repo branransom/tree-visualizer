@@ -1,0 +1,17 @@
+// GRID
+$grid-width: 100vw;
+$grid-height: 100vh;
+$gutter-vertical: 2rem;
+$gutter-horizontal: 2rem;
+
+// NAV BAR
+$nav-bar-height: 5rem;
+$nav-bar-width: calc(#{$grid-width} - #{$gutter-horizontal} * 2);
+$nav-bar-color: #333;
+
+// CONTAINER
+$container-height: calc(#{$grid-height} - #{$nav-bar-height});
+$container-width: calc(#{$grid-width} - #{$gutter-horizontal} * 2);
+
+// BORDERS
+$border-width: 1px;

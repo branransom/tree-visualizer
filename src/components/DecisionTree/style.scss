@@ -1,8 +1,53 @@
-.node {
-  cursor: pointer;
+@import "../../styles/style";
+
+.decision-tree {
+  position: relative;
+  border: $border-width solid black;
+  background: tan;
+  height: calc(#{$container-height} - 2 * #{$border-width});
+  width: calc(#{$container-width} - 2 * #{$border-width});
 }
 
-circle {
+.tree-container {
+  position: absolute;
+  //background: tan;
+  top: $gutter-vertical;
+  left: $gutter-horizontal;
+  width: calc((#{$container-width} - 2 * #{$gutter-horizontal}) * (2 / 3));
+  height: calc(#{$container-height} - 2 * #{$gutter-vertical});
+}
+
+.tree {
+  width: 100%;
+  height: 100%;
+}
+
+.move-data {
+  position: absolute;
+  border: $border-width solid black;
+  background: white;
+  top: $gutter-vertical;
+  right: $gutter-vertical;
+  width: calc((#{$container-width} - 2 * #{$gutter-horizontal}) * (1 / 3) - 2 * #{$border-width} - #{$gutter-horizontal});
+  height: auto;
+
+  p {
+    margin-left: 5px;
+  }
+}
+
+.principal-variation {
+  position: absolute;
+  border: $border-width solid black;
+  background: white;
+  bottom: $gutter-vertical;
+  right: $gutter-vertical;
+  width: calc((#{$container-width} - 2 * #{$gutter-horizontal}) * (1 / 3) - 2 * #{$border-width} - #{$gutter-horizontal});
+  height: auto;
+}
+
+circle.node {
+  cursor: pointer;
   fill: #fff;
   stroke: steelblue;
   stroke-width: 3px;
@@ -19,7 +64,7 @@ text.label {
   stroke-width: 2px;
 }
 
-div.tooltip {
+.tooltip {
   display: flex;
   position: absolute;
   text-align: left;

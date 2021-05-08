@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
+import { cloneDeep } from "lodash";
 import useResizeObserver from "../../hooks/useResizeObserver";
 
 function usePrevious(value) {
@@ -10,36 +11,27 @@ function usePrevious(value) {
   return ref.current;
 }
 
-const Tree = ({ root: data, importantNodes }) => {
+const Tree = ({ root: data, importantNodes, handleNodeHover }) => {
   if (!data) return null;
 
   // useRef returns a mutable object, which persists across render events.
   // Think of it as an instance variable
-  const rootRef = useRef(data);
   const svgRef = useRef();
   const wrapperRef = useRef();
   const dimensions = useResizeObserver(wrapperRef);
 
-  // we save data to see if it changed
-  const previouslyRenderedData = usePrevious(data);
-
-  //const { width, height } =
-  //  dimensions || wrapperRef.current.getBoundingClientRect();
-  //
-  console.log("re-render", root);
-
-  const width = 800;
-  const height = 900;
+  const [root, setRoot] = useState(data);
 
   useEffect(() => {
-    console.log("useEffect");
-    update();
-  }, []);
-
-  const update = () => {
-    console.log(rootRef);
     const svg = d3.select(svgRef.current);
-    const root = rootRef.current;
+
+    const { width: boundingWidth, height: boundingHeight } =
+      dimensions || wrapperRef.current.getBoundingClientRect();
+
+    const margin = { top: 30, right: 20, bottom: 30, left: 20 };
+    const height = boundingHeight - margin.top - margin.bottom;
+    const width = boundingWidth - margin.right - margin.left;
+
     const treeLayout = d3.tree().size([height, width]);
 
     const linkGenerator = d3
@@ -47,75 +39,35 @@ const Tree = ({ root: data, importantNodes }) => {
       .x((link) => link.y)
       .y((link) => link.x);
 
-    // TODO: prevent multiple tooltips from being created due to re-renders
-    const tooltip = d3
-      .select("#container")
-      .append("div")
-      .attr("class", "tooltip")
-      .style("opacity", 0);
-
     // enrich hierarchical data with coordinates
     treeLayout(root);
 
     console.warn("descendants", root.descendants());
     console.warn("links", root.links());
 
-    // nodes
-    // TODO: Why are all nodes exiting on click? This is causing the entire tree to re-render
     svg
       .selectAll(".node")
       .data(root.descendants())
       .join(
-        (enter) => {
-          console.log("on enter", enter);
-          return enter
-            .append("circle")
-            .attr("class", "node")
-            .on("click", (event, d) => {
-              console.log(d);
-              click(d);
-              //setRoot(cloneDeep(root));
-              //toggleChildren(root);
-            })
-            .attr("opacity", 0);
-        },
-        (update) => {
-          console.log("on update", update);
-          return update;
-        },
-        (exit) => {
-          console.log("on exit", exit);
-          return exit
+        (enter) => enter.append("circle").attr("opacity", 0),
+        (update) => update,
+        (exit) =>
+          exit
             .transition()
             .duration(300)
             .attr("r", 0)
             .style("opacity", 0)
-            .remove();
-          //.attr("cx", 1000)
-          //.on("end", function () {
-          //  d3.select(this).remove();
-          //});
-        }
+            .remove()
       )
-      //.attr("class", "node")
+      .attr("class", "node")
+      .on("click", (event, d) => {
+        click(d);
+      })
       .attr("cx", (node) => node.y)
       .attr("cy", (node) => node.x)
-      .attr("r", 4)
+      .attr("r", 3)
       .on("mouseover", (event, d) => {
-        tooltip.html(`
-          alpha: ${d.data.alpha}<br/>
-          beta: ${d.data.beta}<br/>
-          value: ${d.data.value}
-        `);
-        tooltip
-          .transition()
-          .duration(50)
-          .style("opacity", 1)
-          .style("left", event.pageX + "px")
-          .style("top", event.pageY - 28 + "px");
-      })
-      .on("mouseout", () => {
-        tooltip.transition().duration(500).style("opacity", 0);
+        handleNodeHover(d);
       })
       .transition()
       .duration(500)
@@ -134,11 +86,20 @@ const Tree = ({ root: data, importantNodes }) => {
         return "black";
       });
 
-    // links
-    const enteringAndUpdatingLinks = svg
+    svg
       .selectAll(".link")
       .data(root.links())
-      .join("path")
+      .join(
+        (enter) => {
+          return enter.append("path").attr("opacity", 1);
+        },
+        (update) => {
+          return update;
+        },
+        (exit) => {
+          return exit.transition().duration(300).attr("opacity", 0).remove();
+        }
+      )
       .attr("class", "link")
       .attr("d", linkGenerator)
       .attr("stroke-dasharray", function () {
@@ -146,25 +107,20 @@ const Tree = ({ root: data, importantNodes }) => {
         return `${length} ${length}`;
       })
       .attr("stroke", "black")
-      .attr("fill", "none")
-      .attr("opacity", 1);
+      .attr("fill", "none");
 
-    if (data !== previouslyRenderedData) {
-      enteringAndUpdatingLinks
-        .attr("stroke-dashoffset", function () {
-          return this.getTotalLength();
-        })
-        .transition()
-        .duration(500)
-        .delay((link) => link.source.depth * 500)
-        .attr("stroke-dashoffset", 0);
-    }
-
-    // labels
     svg
       .selectAll(".label")
       .data(root.descendants())
-      .join((enter) => enter.append("text").attr("opacity", 0))
+      .join(
+        (enter) => enter.append("text").attr("opacity", 1),
+        (update) => {
+          return update;
+        },
+        (exit) => {
+          return exit.transition().duration(300).attr("opacity", 0).remove();
+        }
+      )
       .attr("class", "label")
       .attr("x", (node) => node.y)
       .attr("y", (node) => node.x - 12)
@@ -173,10 +129,9 @@ const Tree = ({ root: data, importantNodes }) => {
       .duration(500)
       .delay((node) => node.depth * 300)
       .attr("opacity", 1);
-  };
+  }, [root]);
 
   function click(d) {
-    console.log("on click", d);
     if (d.children) {
       d._children = d.children;
       d.children = null;
@@ -184,20 +139,13 @@ const Tree = ({ root: data, importantNodes }) => {
       d.children = d._children;
       d._children = null;
     }
-    update(root);
+
+    setRoot(cloneDeep(root));
   }
 
   return (
-    <div className="tree" ref={wrapperRef} style={{ marginBottom: "2rem" }}>
-      <svg
-        ref={svgRef}
-        style={{
-          display: "block",
-          overflow: "visible",
-          height: "80vh",
-          width: "100%",
-        }}
-      ></svg>
+    <div className="tree-container" ref={wrapperRef}>
+      <svg ref={svgRef} className="tree"></svg>
     </div>
   );
 };
